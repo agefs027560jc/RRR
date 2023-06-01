@@ -116,6 +116,7 @@ g++ server.o -o server -L./build -lrrr -lmemdb -lexternc -lpthread -L. -ldemo -l
 #include "demo_impl.h"
 
 int main() {
+
     rrr::PollMgr *pm = new rrr::PollMgr();
     std::shared_ptr<rrr::Client> client = std::make_shared<rrr::Client>(pm);
     while (client->connect(std::string("127.0.0.1:8090").c_str())!=0) {
@@ -123,6 +124,7 @@ int main() {
     }
     demo::DemoProxy *client_proxy = new demo::DemoProxy(client.get());
     
+    // Synchronous RPC
     std::string hi = "Hello Server";
     std::string reply;
 
@@ -134,7 +136,26 @@ int main() {
     
     client_proxy->sum(a, b, c, &result);
     printf("%d + %d + %d = %d\n", a, b, c, result);
+
+    // Asynchronous RPC
+    a = 10;
+
+    rrr::FutureAttr fuattr;
+
+    fuattr.callback = [a, b, c, &result] (rrr::Future* fu) {
+        fu->get_reply() >> result;
+        printf("%d + %d + %d = %d\n", a, b, c, result);
+    };
+    
+    client_proxy->async_sum(a, b, c, fuattr);
+
+    sleep(1);
+
+    std::cout << "Finish\n" << std::endl;
+
+    return 0;
 }
+
 ```
 #### - Compile client code
 ```
