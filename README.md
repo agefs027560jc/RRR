@@ -112,11 +112,26 @@ g++ server.o -o server -L./build -lrrr -lmemdb -lexternc -lpthread -L. -ldemo -l
 ### 6. Create Client Code
 #### - Create `client.cc`
 ```
-// client.cc
+/* client.cc */
 #include "demo_impl.h"
 
-int main() {
+int handle_sync_rpc(std::function<rrr::i32()> func) {
+    try {
+        rrr::i32 ret = func();
+        if(ret == 0){
+            return 1;
+        }
+        else {
+            throw ret;
+        }
+    }
+    catch (rrr::i32 ret) {
+        Log_error("Error code %d: %s", ret, strerror(ret));
+    }
+    return 0;
+}
 
+int main() {
     rrr::PollMgr *pm = new rrr::PollMgr();
     std::shared_ptr<rrr::Client> client = std::make_shared<rrr::Client>(pm);
     while (client->connect(std::string("127.0.0.1:8090").c_str())!=0) {
@@ -127,15 +142,15 @@ int main() {
     // Synchronous RPC
     std::string hi = "Hello Server";
     std::string reply;
-
-    client_proxy->hello(hi, &reply);
-    printf("%s\n", reply.c_str());
+    if(handle_sync_rpc([&]() { return client_proxy->hello(hi, &reply); })) {
+        printf("%s\n", reply.c_str());
+    }
 
     rrr::i32 a = 1, b = 2, c = 3;
     rrr::i32 result;
-    
-    client_proxy->sum(a, b, c, &result);
-    printf("%d + %d + %d = %d\n", a, b, c, result);
+    if(handle_sync_rpc([&]() { return client_proxy->sum(a, b, c, &result); })) {
+        printf("%d + %d + %d = %d\n", a, b, c, result);
+    }
 
     // Asynchronous RPC
     a = 10;
@@ -143,19 +158,25 @@ int main() {
     rrr::FutureAttr fuattr;
 
     fuattr.callback = [a, b, c, &result] (rrr::Future* fu) {
-        fu->get_reply() >> result;
-        printf("%d + %d + %d = %d\n", a, b, c, result);
+        rrr::i32 ret = fu->get_error_code();
+        if(ret == 0) {
+            fu->get_reply() >> result;
+            printf("%d + %d + %d = %d\n", a, b, c, result);
+        }
+        else {
+            Log_error("Error code %d: %s", ret, strerror(ret));
+        }
+        fu->release();
     };
     
     client_proxy->async_sum(a, b, c, fuattr);
 
-    sleep(1);
+    sleep(5);
 
     std::cout << "Finish\n" << std::endl;
-
+    
     return 0;
 }
-
 ```
 #### - Compile client code
 ```
