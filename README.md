@@ -180,7 +180,6 @@ int main() {
 ```
 #### - Compile client code
 ```
-# Compile client.cpp
 g++ -I ~/depfast/src/rrr client.cc -c
 g++ client.o -o client -L./build -lrrr -lmemdb -lexternc -lpthread -L. -ldemo -lboost_coroutine -lboost_context -lboost_system
 ```
