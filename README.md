@@ -116,16 +116,11 @@ g++ server.o -o server -L./build -lrrr -lmemdb -lexternc -lpthread -L. -ldemo -l
 #include "demo_impl.h"
 
 int handle_sync_rpc(std::function<rrr::i32()> func) {
-    try {
-        rrr::i32 ret = func();
-        if(ret == 0){
-            return 1;
-        }
-        else {
-            throw ret;
-        }
+    rrr::i32 ret = func();
+    if(ret == 0){
+        return 1;
     }
-    catch (rrr::i32 ret) {
+    else {
         Log_error("Error code %d: %s", ret, strerror(ret));
     }
     return 0;
@@ -171,7 +166,7 @@ int main() {
     
     client_proxy->async_sum(a, b, c, fuattr);
 
-    sleep(5);
+    sleep(10);
 
     std::cout << "Finish\n" << std::endl;
     
