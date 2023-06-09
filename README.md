@@ -1,4 +1,6 @@
-# DepFast-Docs
+# A Repeatable Research Runtime (RRR)
+
+This is a collection of utility code.
 
 ## Generate DepFast Code (Ubuntu 20.04, ≥4GB RAM)
 
