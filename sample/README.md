@@ -6,7 +6,7 @@ This is a collection of utility code.
 
 On Ubuntu, run
 ```bash
-$ sudo apt install -y python2 build-essential libboost-all-dev cmake cmake-curses-gui ninja-build
+$ sudo apt install -y python2 pkg-config build-essential libboost-all-dev cmake cmake-curses-gui ninja-build
 ```
 and then clone the repo,
 ```bash
