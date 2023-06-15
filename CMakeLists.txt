@@ -8,19 +8,10 @@ project(rrr)
 
 find_package(Threads)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PYTHON REQUIRED python2)
-
-set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "/.../boost")
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "/.../boost/lib")
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_BOOST_CMAKE ON)
-find_package(Boost COMPONENTS system filesystem context thread coroutine REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
+pkg_check_modules(PYTHON REQUIRED python3)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g -DNDEBUG")
 
 #if(APPLE)
 #  set(RT "")
@@ -28,13 +19,22 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 #  set(RT "rt")
 #endif()
 
+include_directories(
+  ${PYTHON_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+link_directories(
+  ${PYTHON_LIBRARY_DIRS}
+)
+
 file(GLOB src
   "base/*.hpp"
   "base/*.cpp"
   "misc/*.hpp"
   "misc/*.cpp"
-  "mq/*.cpp"
-  "mq/*.h"
+#  "mq/*.cpp"
+#  "mq/*.h"
   "reactor/*.h"
   "reactor/*.cc"
   "pylib/simplerpc/_pyrpc.cpp"
